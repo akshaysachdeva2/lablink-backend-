@@ -2,12 +2,18 @@
 import { GoogleGenAI } from '@google/genai';
 import { env } from '../config/env.js';
 
-const gemini = new GoogleGenAI({
-  apiKey: env.GEMINI_API_KEY
-});
+function getGeminiClient(): GoogleGenAI {
+  const apiKey = env.GEMINI_API_KEY;
+
+  if (!apiKey) {
+    throw new Error('AI report summaries are not configured. Please add GEMINI_API_KEY to the backend environment.');
+  }
+
+  return new GoogleGenAI({ apiKey });
+}
 
 export async function generateAIResponse(prompt: string): Promise<string> {
-  const response = await gemini.models.generateContent({
+  const response = await getGeminiClient().models.generateContent({
     model: 'gemini-3.1-flash-lite',
     contents: prompt,
     config: {
@@ -71,7 +77,7 @@ export async function summarizeUploadedReport(
 
   const base64Data = fileBuffer.toString('base64');
 
-  const response = await gemini.models.generateContent({
+  const response = await getGeminiClient().models.generateContent({
     model: 'gemini-3.1-flash-lite',
     contents: [
       {
