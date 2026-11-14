@@ -18,7 +18,8 @@ export const app = express();
 app.use(cors({
   origin: [
     'http://localhost:5173',
-    'https://lablink-frontend-lime.vercel.app'
+    'https://lablink-frontend-lime.vercel.app',
+    'https://lablink-frontend-git-lablink-improvements-akshay-ceae.vercel.app'
   ],
   credentials: true
 }));
