@@ -1,8 +1,10 @@
-
+import reportsRoutes from './routes/reports.routes.js';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import aiRoutes from './routes/ai.routes.js';
+
 
 import { env } from './config/env.js';
 import authRoutes from './routes/auth.routes.js';
@@ -20,6 +22,7 @@ app.use(cors({
   ],
   credentials: true
 }));
+app.use('/api/ai', aiRoutes);
 
 app.use(helmet());
 app.use(express.json({ limit: '1mb' }));
@@ -40,6 +43,7 @@ app.get('/api/health', (_req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api', catalogRoutes);
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/reports', reportsRoutes);
 
 // Error handling
 app.use(notFound);
