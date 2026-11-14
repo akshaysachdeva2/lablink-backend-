@@ -1,221 +1,153 @@
-# LabLink – Backend
+# LabLink Backend
 
-The backend service for **LabLink**, a full-stack diagnostic test comparison and appointment booking platform.
+The REST API for **LabLink**, a full-stack diagnostic test comparison and appointment booking platform.
 
-Built using Node.js, Express, TypeScript and PostgreSQL, the backend provides RESTful APIs for user authentication, diagnostic test discovery, laboratory-wise price comparison and appointment booking.
+Built with Node.js, Express, TypeScript, and PostgreSQL. The backend supports account authentication, diagnostic test and laboratory data, lab-wise price comparison, appointment booking, and AI-assisted medical report summaries.
+
+**Live API:** https://lablink-backend-cp9v.onrender.com/api  
+**Health check:** https://lablink-backend-cp9v.onrender.com/api/health
+
+> **Demo-data notice:** Seeded laboratory listings, prices, and availability are sample data for demonstrating the application. They are not live quotes or verified listings from real diagnostic providers.
 
 ## Features
 
-- **User Authentication:** User registration and login using JWT-based authentication.
-- **Password Security:** Password hashing using bcrypt.
-- **Diagnostic Test APIs:** Retrieve available diagnostic tests and their details.
-- **Laboratory Management:** Retrieve partner laboratory information.
-- **Price Comparison:** Fetch laboratory-wise prices and test availability.
-- **Appointment Booking:** Create authenticated diagnostic test bookings.
-- **Booking History:** Retrieve bookings associated with authenticated users.
-- **Booking Cancellation:** Cancel existing bookings through authenticated API requests.
-- **Database Integration:** Store and retrieve application data using PostgreSQL.
+- **Authentication:** Registration and login with JWT-based authentication.
+- **Password protection:** Passwords are hashed using bcrypt.
+- **Diagnostic catalogue:** API support for listing and retrieving diagnostic tests.
+- **Laboratories and price comparison:** Laboratory information, lab-specific test prices, and availability.
+- **Appointment booking:** Authenticated users can create bookings with test, laboratory, collection type, date, time slot, and patient details.
+- **Booking history:** Retrieve bookings for the authenticated user.
+- **Booking cancellation:** Authenticated booking cancellation.
+- **AI report summaries:** Authenticated report-upload endpoint that accepts PDF, JPEG, and PNG files, requires explicit consent, and sends the report for summarization using Google Gemini.
+- **Upload validation:** In-memory upload handling, supported MIME-type validation, and a 10 MB file-size limit for report uploads.
+- **API protection:** CORS configuration, Helmet security headers, and rate limiting.
 
 ## Technology Stack
 
 | Category | Technology |
 |---|---|
 | Runtime | Node.js |
-| Backend Framework | Express.js |
-| Programming Language | TypeScript |
+| Framework | Express.js |
+| Language | TypeScript |
 | Database | PostgreSQL |
-| Authentication | JSON Web Tokens (JWT) |
-| Password Hashing | bcrypt |
-| API Architecture | REST |
-| Package Manager | npm |
+| Authentication | JSON Web Tokens |
+| Password hashing | bcryptjs |
+| AI integration | Google Gemini API |
+| Validation | Zod |
+| Security middleware | Helmet, express-rate-limit |
+| File uploads | Multer |
+| PostgreSQL client | node-postgres (`pg`) |
 
-## Project Structure
+## Repository
 
-```text
-lablink-backend/
-│
-├── src/
-│   ├── routes/
-│   ├── controllers/
-│   ├── middleware/
-│   ├── config/
-│   └── app.ts
-│
-├── database/
-│   └── SQL initialization and seed files
-│
-├── .env.example
-├── .gitignore
-├── package.json
-├── package-lock.json
-└── tsconfig.json
-```
-
-*Note: The directory structure above is illustrative. Adjust it to match the actual project files.*
+- **Backend:** https://github.com/akshaysachdeva2/lablink-backend-
+- **Frontend:** https://github.com/akshaysachdeva2/lablink-frontend
 
 ## Requirements
-
-Before running the backend, make sure you have:
 
 - Node.js 20 or newer
 - npm
 - PostgreSQL
-- Git (optional)
 
-## Installation and Setup
+## Local Setup
 
-### 1. Clone the Repository
-
-```bash
-git clone YOUR_BACKEND_REPOSITORY_URL
-```
-
-Navigate to the project directory:
+### 1. Clone the repository
 
 ```bash
-cd lablink-backend
-```
-
-### 2. Install Dependencies
-
-```bash
+git clone https://github.com/akshaysachdeva2/lablink-backend-.git
+cd lablink-backend-
 npm install
 ```
 
-### 3. Configure Environment Variables
+### 2. Create the database
 
-Create a `.env` file in the project root.
+Create a PostgreSQL database named `lablink` (or update the connection string to match your database):
 
-Add the required configuration:
+```sql
+CREATE DATABASE lablink;
+```
+
+### 3. Configure environment variables
+
+Create a `.env` file in the backend project root:
 
 ```env
 PORT=5001
-DATABASE_URL=your_postgresql_connection_string
-JWT_SECRET=your_secure_random_secret
+NODE_ENV=development
+FRONTEND_URL=http://localhost:5173
+DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/lablink
+JWT_SECRET=replace_with_a_random_secret_of_at_least_32_characters
+JWT_EXPIRES_IN=7d
+GEMINI_API_KEY=your_gemini_api_key
 ```
 
-Use the actual environment variable names expected by your backend code. If your project uses separate PostgreSQL variables such as `DB_HOST`, `DB_USER` and `DB_PASSWORD`, configure those instead.
+Replace the placeholders with your own local PostgreSQL connection details and credentials. `GEMINI_API_KEY` is optional for starting the API, but is required to use the Gemini-powered functionality. Never commit your real `.env` file, database password, JWT secret, or API key.
 
-**Security:** Never commit your `.env` file, database passwords or JWT secrets to GitHub. Use `.env.example` with placeholder values for documentation.
+### 4. Initialize and seed the database
 
-### 4. Configure PostgreSQL
+The package scripts use the local PostgreSQL command-line client and the database name `lablink`:
 
-- Create the LabLink PostgreSQL database.
-- Configure the database connection in `.env`.
-- Execute the SQL initialization scripts.
-- Execute the seed scripts to populate demonstration data.
+```bash
+npm run db:setup
+npm run db:seed
+```
 
-The current demonstration dataset contains six sample diagnostic tests and six sample partner laboratories.
+If your PostgreSQL setup uses a different database user or connection configuration, adjust the commands/scripts for your environment before running them.
 
-### 5. Start the Development Server
+The current seed data contains 10 diagnostic tests, 20 laboratories, and approximately 200 lab-price records. These are demonstration records, not live provider data.
 
-Run:
+### 5. Start the development server
 
 ```bash
 npm run dev
 ```
 
-The backend is configured to run on:
+The configured local API port defaults to `5000`; if you use port `5001`, set `PORT=5001` in `.env`.
 
-```text
-http://localhost:5001
-```
+- API base: `http://localhost:5001/api` (when configured with port 5001)
+- Health check: `http://localhost:5001/api/health`
 
-The API base URL is:
+## Available Scripts
 
-```text
-http://localhost:5001/api
-```
-
-Health check endpoint:
-
-```text
-http://localhost:5001/api/health
-```
-
-## API Functionality
-
-The backend provides API functionality for the following operations:
-
-| Module | Functionality |
+| Command | Purpose |
 |---|---|
-| Authentication | Registration and login |
-| Diagnostic Tests | Test listing, searching and details |
-| Laboratories | Laboratory information |
-| Price Comparison | Lab-wise test prices and availability |
-| Bookings | Create diagnostic test bookings |
-| Booking History | Retrieve user bookings |
-| Booking Management | Cancel existing bookings |
+| `npm install` | Install dependencies |
+| `npm run dev` | Run the API in watch mode |
+| `npm run build` | Compile TypeScript into `dist` |
+| `npm start` | Run the compiled server |
+| `npm run db:setup` | Apply `database/schema.sql` to the `lablink` database |
+| `npm run db:seed` | Load `database/seed.sql` into the `lablink` database |
 
-Authenticated endpoints use JWT-based authorization.
+## API Capabilities
 
-## Running the Full Application
+| Area | Capability |
+|---|---|
+| Authentication | Register and sign in |
+| Diagnostic tests | Browse and retrieve test information |
+| Laboratories | Retrieve laboratory information |
+| Price comparison | Retrieve lab-wise prices and availability |
+| Bookings | Create bookings for authenticated users |
+| Booking history | Retrieve the signed-in user's bookings |
+| Booking management | Cancel an existing booking |
+| AI report summary | Upload a report with consent and request an AI-generated summary |
 
-LabLink consists of two independently running applications.
+The report-summary endpoint expects an authenticated request with a multipart file field named `report` and a consent field set to `consent=true`. Supported uploads are PDF, JPEG, and PNG, up to 10 MB.
 
-**Backend terminal:**
+## Running with the Frontend
 
-```bash
-npm run dev
-```
+Run the backend and frontend in separate terminals. Start the frontend using its own README instructions and configure its `VITE_API_BASE_URL` to point to this API.
 
-**Frontend terminal:**
+For local development, the frontend normally runs at `http://localhost:5173` and the backend API can run at `http://localhost:5001/api` when `PORT=5001` is configured. Set `FRONTEND_URL` to the frontend origin so the backend CORS configuration can allow it.
 
-```bash
-npm run dev
-```
+## Security and Medical Disclaimer
 
-The frontend communicates with the backend through:
+- Passwords are hashed; protected routes use JWT authentication.
+- Configure secrets through environment variables and keep them out of source control.
+- CORS is restricted to configured frontend origins and local development.
+- Helmet and rate limiting are used as API security middleware.
+- Report uploads require authentication and user consent and are subject to file-type and size checks.
+- AI-generated report summaries are informational only, may be inaccurate, and are not a diagnosis or a substitute for a qualified medical professional.
 
-```text
-http://localhost:5001/api
-```
+## Project Overview
 
-The frontend development server normally runs at:
-
-```text
-http://localhost:5173
-```
-
-## Database Design
-
-PostgreSQL is used as the primary relational database.
-
-The database manages interconnected application entities, including:
-
-- Users
-- Diagnostic laboratories
-- Diagnostic tests
-- Laboratory-specific test prices
-- Appointment bookings
-
-Relational constraints and database relationships help maintain data consistency across the application.
-
-## Security Considerations
-
-- Passwords are hashed using bcrypt.
-- JWT authentication protects authorized operations.
-- Sensitive configuration is stored in environment variables.
-- Environment files containing secrets are excluded from version control.
-- Backend CORS configuration restricts permitted frontend origins.
-
-## Future Improvements
-
-Potential enhancements include:
-
-- Online payment integration.
-- Email and SMS appointment notifications.
-- Advanced laboratory search and filtering.
-- Real-time appointment slot management.
-- Laboratory administration dashboard.
-- Improved error handling and automated testing.
-
-## Project Information
-
-**Project:** LabLink  
-**Type:** Full-Stack Web Application  
-**Backend:** Node.js + Express.js + TypeScript  
-**Database:** PostgreSQL  
-**Frontend:** React + TypeScript + Vite
-
-LabLink demonstrates practical implementation of REST APIs, authentication, relational database management, backend development and full-stack application integration.
+LabLink's backend demonstrates REST API development, authentication, relational database integration, booking workflows, upload validation, security middleware, and integration with an external generative AI service.
