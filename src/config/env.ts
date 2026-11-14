@@ -22,7 +22,7 @@ const envSchema = z.object({
 
   JWT_EXPIRES_IN: z.string().default('7d'),
 
-  GEMINI_API_KEY: z.string().min(1, 'GEMINI_API_KEY is required')
+  GEMINI_API_KEY: z.string().optional()
 });
 
 export const env = envSchema.parse(process.env);
